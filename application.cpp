@@ -20,8 +20,9 @@ const char* vertexShaderSource = R"(
 const char* fragmentShaderSource = R"(
     #version 330 core
     out vec4 FragColor;
+    uniform vec4 uColor; // Uniform for dynamic color
     void main() {
-        FragColor = vec4(1.0, 0.0, 1.0, 1.0); // Magenta color
+        FragColor = uColor;
     }
 )";
 
@@ -37,6 +38,9 @@ void createMenu(ImGuiIO& io) {
 
     ImGui::Begin("Menu");
 
+    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
     ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
@@ -132,6 +136,7 @@ int main()
     ImGui_ImplOpenGL3_Init("#version 330"); // ** Context/Backend initialization **
 
     ImVec4 clear_color = ImVec4(0.20f, 0.30f, 0.30f, 1.00f);
+    GLuint uniform = glGetUniformLocation(shaderProgram, "uColor");
 
     // render loop
     // -----------
@@ -162,7 +167,9 @@ int main()
         
         createMenu(io);
 
+        glUniform4f(uniform, 1.0f, 0.0f, 1.0f, 1.0f);
         glUseProgram(shaderProgram);
+
         glBindVertexArray(vertex_array);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 

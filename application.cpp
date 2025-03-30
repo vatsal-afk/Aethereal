@@ -33,17 +33,20 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+static float r = 0.0f, g = 0.0f, b = 0.0f, a = 0.0f;
+
 void createMenu(ImGuiIO& io) {
-    static float f = 0.0f;
+    ImGui::SetNextWindowSize(ImVec2(300, 150));
+    // ImGui::SetNextWindowPos(ImVec2(50, 50));
 
     ImGui::Begin("Menu");
 
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    ImGui::SliderFloat("R", &r, 0.0f, 1.0f);
+    ImGui::SliderFloat("G", &g, 0.0f, 1.0f);
+    ImGui::SliderFloat("B", &b, 0.0f, 1.0f);
+    ImGui::SliderFloat("A", &a, 0.0f, 1.0f);
 
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
 }
 
@@ -167,7 +170,7 @@ int main()
         
         createMenu(io);
 
-        glUniform4f(uniform, 1.0f, 0.0f, 1.0f, 1.0f);
+        glUniform4f(uniform, r, g, b, a);
         glUseProgram(shaderProgram);
 
         glBindVertexArray(vertex_array);

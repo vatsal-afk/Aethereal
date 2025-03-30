@@ -3,10 +3,27 @@
 #include<glm/glm.hpp>
 
 #include <iostream>
+#include <vector>
 
 #include "vendor/imgui/imgui.h"
 #include "vendor/imgui/imgui_impl_glfw.h"
 #include "vendor/imgui/imgui_impl_opengl3.h"
+
+const char* vertexShaderSource = R"(
+    #version 330 core
+    layout (location = 0) in vec2 aPos;
+    void main() {
+        gl_Position = vec4(aPos, 0.0, 1.0);
+    }
+)";
+
+const char* fragmentShaderSource = R"(
+    #version 330 core
+    out vec4 FragColor;
+    void main() {
+        FragColor = vec4(1.0, 0.0, 1.0, 1.0); // Magenta color
+    }
+)";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -14,6 +31,17 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+void createMenu(ImGuiIO& io) {
+    static float f = 0.0f;
+
+    ImGui::Begin("Menu");
+
+    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::End();
+}
 
 int main()
 {
@@ -23,10 +51,6 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
 
     // glfw window creation
     // --------------------
@@ -46,7 +70,51 @@ int main()
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
-    }    
+    }
+
+    GLuint vertex_buffer,  vertex_array;
+    // GLuint data_size = 6 * sizeof(float); // size in bytes
+    std::vector<float> vertices(6);
+    std::vector<float> color(3);
+    vertices = { -0.5f, -0.5f,
+                  0.5f, -0.5f,
+                  0.0f,  0.5f };
+    color = {1, 0, 1}; // RGB
+
+    glGenVertexArrays(1, &vertex_array);
+    glGenBuffers(1, &vertex_buffer);
+
+    glBindVertexArray(vertex_array);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    // Define vertex attributes (position)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    glEnableVertexAttribArray(0);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // Compile Vertex Shader
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+
+    // Compile Fragment Shader
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    // Link Shader Program
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    // Cleanup shaders (no longer needed after linking)
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -63,7 +131,7 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330"); // ** Context/Backend initialization **
 
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.20f, 0.30f, 0.30f, 1.00f);
 
     // render loop
     // -----------
@@ -75,7 +143,7 @@ int main()
 
         // render
         // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -92,22 +160,18 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
-        static float f = 0.0f;
+        createMenu(io);
 
-        ImGui::Begin("Menu");
-
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-                  
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
+        glUseProgram(shaderProgram);
+        glBindVertexArray(vertex_array);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Rendering
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
+        
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);

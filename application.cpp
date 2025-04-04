@@ -17,6 +17,7 @@ const char* vertexShaderSource = R"(
     }
 )";
 
+// memory and shader mgmt
 const char* fragmentShaderSource = R"(
     #version 330 core
     out vec4 FragColor;
@@ -79,14 +80,12 @@ int main()
         return -1;
     }
 
-    GLuint vertex_buffer,  vertex_array;
+    GLuint vertex_buffer, vertex_array;
     // GLuint data_size = 6 * sizeof(float); // size in bytes
     std::vector<float> vertices(6);
-    std::vector<float> color(3);
     vertices = { -0.5f, -0.5f,
                   0.5f, -0.5f,
                   0.0f,  0.5f };
-    color = {1, 0, 1}; // RGB
 
     glGenVertexArrays(1, &vertex_array);
     glGenBuffers(1, &vertex_buffer);

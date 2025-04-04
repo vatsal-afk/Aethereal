@@ -1,9 +1,13 @@
 # Compiler
 CXX = g++
-CXXFLAGS = -Wall -Iinclude -Ivendor/imgui
+CXXFLAGS = -Wall -std=c++17 -Iinclude -Ivendor/imgui -Ivendor/glad
 
 # Source files
-SRC = application.cpp src/glad.c \
+SRC = src/core/main.cpp \
+      src/core/Renderer.cpp \
+      src/core/Shader.cpp \
+      src/core/InputManager.cpp \
+      src/glad.c \
       vendor/imgui/imgui.cpp \
       vendor/imgui/imgui_demo.cpp \
       vendor/imgui/imgui_draw.cpp \
@@ -15,8 +19,8 @@ SRC = application.cpp src/glad.c \
 # Output binary
 TARGET = app
 
-# Libraries
-LIBS = -lglfw -ldl -lGL
+# Libraries (for Linux)
+LIBS = -lglfw -ldl -lGL -lX11 -lpthread
 
 # Default target
 all: $(TARGET)

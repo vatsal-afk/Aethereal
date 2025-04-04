@@ -6,7 +6,7 @@
 
 ```bash
 sudo apt update
-sudo apt install build-essential cmake git \
+sudo apt install build-essential cmake \
     libglfw3-dev libgl1-mesa-dev libglu1-mesa-dev \
     libglm-dev libx11-dev libxi-dev libxcursor-dev \
     libxrandr-dev libxinerama-dev libglew-dev
@@ -15,7 +15,6 @@ sudo apt install build-essential cmake git \
 ### 🛠️ Build the Project
 
 ```bash
-make clean
 make
 ```
 
